@@ -1,8 +1,10 @@
 import retro
 
-
 def main():  
-  env = retro.make(game='SuperMarioWorld-Snes')
+  env = retro.make(
+    game='SuperMarioWorld-Snes',
+    scenario="./scenario.json",
+  )
   env.reset()
   while True:
     action = env.action_space.sample()
@@ -10,8 +12,6 @@ def main():
     env.render()
     if info["lives"] == 3:
       env.reset()
-
-  env.close()
 
 if __name__ == "__main__":
   main()
