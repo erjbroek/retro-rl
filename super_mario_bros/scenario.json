@@ -1,0 +1,22 @@
+{
+  "done": {
+    "variables": {
+      "lives": {
+        "op": "equal",
+        "reference": -1
+      }
+    }
+  },
+  "reward": {
+    "variables": {
+      "xscrollLo": {
+        "reward": 1
+      }
+    }
+  }, 
+  "actions": [
+    [[], [], ["RIGHT"]],
+    [[], ["A"]],
+    [[], ["B"]]
+  ]
+}
