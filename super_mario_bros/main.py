@@ -1,25 +1,28 @@
 import retro
 
 
-def main():
-  env = retro.make(
-    game="SuperMarioBros-Nes",
-    scenario="./scenario.json",
-    state="./Level3-1.state"
-  )
-  env.reset()
-  
-  # print(env.buttons)
-  while True:
-    action = env.action_space.sample()
-    observation, reward, terminated, truncated, info = env.step(action)
-    print(reward)
-    env.render()
-    if terminated or truncated:
-      env.reset()
+class MarioAI:
+  def __init__(self):
+    self.env = retro.make(
+      game="SuperMarioBros-Nes",
+      scenario="./scenario.json",
+      state="./Level1-1.state"
+    )
 
-  env.close()
+  def preprocess(self, observation):
+    pass
+
+  def run(self):
+    self.env.reset()
+    while True:
+      action = self.env.action_space.sample()
+      observation, reward, terminated, truncated, info = self.env.step(action)
+
+      self.env.render()
+      if terminated or truncated:
+        self.env.reset()
 
 
 if __name__ == "__main__":
-  main()
+  mario_ai = MarioAI()
+  mario_ai.run()
