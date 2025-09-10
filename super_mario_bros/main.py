@@ -1,5 +1,8 @@
 import retro
-
+from gymnasium.wrappers import GrayscaleObservation
+from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
+import matplotlib.pyplot as plt
+from gym.spaces import Box
 
 class MarioAI:
   def __init__(self):
@@ -8,9 +11,11 @@ class MarioAI:
       scenario="./scenario.json",
       state="./Level1-1.state"
     )
+    
+    self.preprocess()
 
-  def preprocess(self, observation):
-    pass
+  def preprocess(self):
+    self.env = GrayscaleObservation(self.env)
 
   def run(self):
     self.env.reset()
