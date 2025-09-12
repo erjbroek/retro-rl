@@ -2,7 +2,7 @@ import retro
 from gymnasium.wrappers import GrayscaleObservation
 from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 from stable_baselines3 import PPO
-from callbacks.train_logging_callback import TrainAndLoggingCallback
+from train_logging_callback import TrainAndLoggingCallback
 
 CHECKPOINT_DIRECTORY = './train/'
 LOG_DIRECTORY = './logs/'
@@ -17,6 +17,8 @@ class MarioAI:
     )
     
     self.preprocess()
+    self.model = PPO('CnnPolicy', self.env, verbose=1, tensorboard_log=LOG_DIRECTORY, 
+                     learning_rate=0.000001, n_steps=512)
 
   def preprocess(self):
     self.env = GrayscaleObservation(self.env, keep_dim=True)
