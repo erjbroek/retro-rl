@@ -1,13 +1,19 @@
 import retro
 from gymnasium.wrappers import GrayscaleObservation
 from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
+from stable_baselines3 import PPO
+from callbacks.train_logging_callback import TrainAndLoggingCallback
+
+CHECKPOINT_DIRECTORY = './train/'
+LOG_DIRECTORY = './logs/'
+callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIRECTORY)
 
 class MarioAI:
   def __init__(self):
     self.env = retro.make(
       game="SuperMarioBros-Nes",
       scenario="./scenario.json",
-      state="./Level8-1.state"
+      state="./Level1-1.state"
     )
     
     self.preprocess()
