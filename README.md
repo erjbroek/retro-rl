@@ -3,6 +3,7 @@
 future steps to implement:
 
 - [x] Set up environment  
-- [] apply preprocessing
-- [] setup of initial model
+- [x] apply preprocessing
+- [x] setup of initial model
+- [ ] model finetuning (like frameskipping or sticky actions 
 
