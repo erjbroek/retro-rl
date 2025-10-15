@@ -1,4 +1,6 @@
 .venv
-super_mario_bros/logs
+super_mario_bros/logs/*
 super_mario_bros/train
 super_mario_bros/__pycache__
+super_mario_bros/recordings/bk2/*
+super_mario_bros/recordings/mp4/*
