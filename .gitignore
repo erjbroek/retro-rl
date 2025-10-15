@@ -1,4 +1,5 @@
 .venv
+*.zip
 super_mario_bros/logs/*
 super_mario_bros/train
 super_mario_bros/__pycache__

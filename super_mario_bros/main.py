@@ -1,14 +1,21 @@
 import retro
+import time
+import os
+from utils import format_time_from_seconds
 from gymnasium.wrappers import GrayscaleObservation
 from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 from stable_baselines3 import PPO
 from train_logging_callback import TrainAndLoggingCallback
+from wrappers import FrameSkip
+
 
 CHECKPOINT_DIRECTORY = './train/'
 LOG_DIRECTORY = './logs/'
+BK2_DIRECTORY = os.path.abspath("./recordings/bk2")
 callback = TrainAndLoggingCallback(check_freq=200000, save_path=CHECKPOINT_DIRECTORY)
-total_steps = 2000
-check_count = 4
+total_steps = 20000
+check_count = 10
+start_time = time.time()
 
 class MarioAI:
   def __init__(self):
@@ -23,6 +30,7 @@ class MarioAI:
     self.model = PPO('CnnPolicy', self.env, verbose=1, tensorboard_log=LOG_DIRECTORY, 
                      learning_rate=0.0001, n_steps=512)
     self.loaded = False
+    self.current_round = 0
 
   # because the environments render mode cannot be changed outside of initialisation,
   # this reset function resets the environment so that the render_mode can be changed
@@ -33,7 +41,7 @@ class MarioAI:
       scenario="./scenario.json",
       state="./Level1-1.state",
       render_mode=render_mode,
-      record=record_dir
+      record=BK2_DIRECTORY if should_record else None
     )
     self.preprocess()
   
@@ -57,6 +65,7 @@ class MarioAI:
     self.env = GrayscaleObservation(self.env, keep_dim=True)
     self.env = DummyVecEnv([lambda: self.env])
     self.env = VecFrameStack(self.env, 4, channels_order='last')
+    self.env = FrameSkip(self.env, skip=5)
 
   # This is what actually loads and trains the model
   #   Here, the training is split up into check_count number of ste.ps, which enables us to visualise
