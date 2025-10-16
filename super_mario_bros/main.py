@@ -8,13 +8,11 @@ from stable_baselines3 import PPO
 from train_logging_callback import TrainAndLoggingCallback
 from wrappers import FrameSkip
 
-
-CHECKPOINT_DIRECTORY = './train/'
-LOG_DIRECTORY = './logs/'
 BK2_DIRECTORY = os.path.abspath("./recordings/bk2")
-callback = TrainAndLoggingCallback(check_freq=200000, save_path=CHECKPOINT_DIRECTORY)
+LOG_DIRECTORY = os.path.abspath('./logs/')
 total_steps = 20000
 check_count = 10
+callback = TrainAndLoggingCallback(check_freq=total_steps, save_path=BK2_DIRECTORY)
 start_time = time.time()
 
 class MarioAI:
@@ -23,26 +21,30 @@ class MarioAI:
       game="SuperMarioBros-Nes",
       scenario="./scenario.json",
       state="./Level1-1.state",
-      render_mode=None
+      render_mode=None,
     )
     
     self.preprocess()
     self.model = PPO('CnnPolicy', self.env, verbose=1, tensorboard_log=LOG_DIRECTORY, 
-                     learning_rate=0.0001, n_steps=512)
+                     learning_rate=0.00001, n_steps=512)
     self.loaded = False
     self.current_round = 0
 
   # because the environments render mode cannot be changed outside of initialisation,
   # this reset function resets the environment so that the render_mode can be changed
   def reset(self, render_mode, should_record):
-    record_dir = '.' if should_record else None
-    self.env = retro.make(
-      game="SuperMarioBros-Nes",
-      scenario="./scenario.json",
-      state="./Level1-1.state",
-      render_mode=render_mode,
-      record=BK2_DIRECTORY if should_record else None
-    )
+    make_kwargs = {
+      "game": "SuperMarioBros-Nes",
+      "scenario": "./scenario.json",
+      "state": "./Level1-1.state",
+      "render_mode": render_mode
+    }
+
+    if should_record:
+        make_kwargs["record"] = BK2_DIRECTORY
+
+    self.env = retro.make(**make_kwargs)
+    self.env.movie_id = self.current_round
     self.preprocess()
   
   # preprocesses the environment.
@@ -63,9 +65,9 @@ class MarioAI:
   #     directory observation3.png, showing the 4 consecutive frames.
   def preprocess(self):
     self.env = GrayscaleObservation(self.env, keep_dim=True)
+    self.env = FrameSkip(self.env, skip=4)
     self.env = DummyVecEnv([lambda: self.env])
     self.env = VecFrameStack(self.env, 4, channels_order='last')
-    self.env = FrameSkip(self.env, skip=5)
 
   # This is what actually loads and trains the model
   #   Here, the training is split up into check_count number of ste.ps, which enables us to visualise
@@ -75,7 +77,7 @@ class MarioAI:
       self.model = PPO.load('SMB_PPO')
       self.model.set_env(self.env)
     self.model.learn(total_timesteps=total_steps / check_count, callback=callback)
-    self.model.save('SMB_PPO')
+    # self.model.save('SMB_PPO')
     self.loaded = True
 
   # Visualises the agent in the environment. Important to mention this is seperate for training the
@@ -85,12 +87,17 @@ class MarioAI:
     self.reset(render_mode='human', should_record=True)
     state = self.env.reset()
     finished = False
+
     while not finished:
       action, _ = self.model.predict(state)
       obs, reward, done, info = self.env.step(action)
-      if info[0]['time'] <= 300:
+
+      if info[0]['time'] <= 250 or done[0]:
         finished = True
         self.env.close()
+        self.current_round += 1
+        print(f"Round {self.current_round}")
+        print(f"Estimated time left: {format_time_from_seconds(round(time.time() - start_time, 2))} / {format_time_from_seconds(round(((time.time() - start_time) / self.current_round) * check_count))}")
         self.reset(render_mode=None, should_record=False)
 
 if __name__ == "__main__":
