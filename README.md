@@ -6,5 +6,7 @@ future steps to implement smb-nes:
 - [x] Set up environment  
 - [x] apply preprocessing
 - [x] setup of initial model
-- [ ] model finetuning (like frameskipping or sticky actions 
+- [] model finetuning (like frameskipping)
+- [] find a way to have random states every episode
+- [] checkout and compare brute 
 

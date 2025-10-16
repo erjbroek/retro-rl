@@ -1,15 +1,19 @@
 import retro
 import time
 import os
+import random
 from utils import format_time_from_seconds
 from gymnasium.wrappers import GrayscaleObservation
 from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 from stable_baselines3 import PPO
 from train_logging_callback import TrainAndLoggingCallback
 from wrappers import FrameSkip
+from pathlib import Path
 
 BK2_DIRECTORY = os.path.abspath("./recordings/bk2")
-LOG_DIRECTORY = os.path.abspath('./logs/')
+LOG_DIRECTORY = os.path.abspath('./logs')
+STATE_DIRECTORY = os.path.abspath('./states')
+
 total_steps = 20000
 check_count = 10
 callback = TrainAndLoggingCallback(check_freq=total_steps, save_path=BK2_DIRECTORY)
@@ -17,6 +21,8 @@ start_time = time.time()
 
 class MarioAI:
   def __init__(self):
+    # self.state_files = [str(os.path.join(STATE_DIRECTORY, file)) for file in os.listdir(STATE_DIRECTORY)]
+    # chosen_state = random.choice(self.state_files)
     self.env = retro.make(
       game="SuperMarioBros-Nes",
       scenario="./scenario.json",
@@ -41,7 +47,9 @@ class MarioAI:
     }
 
     if should_record:
-        make_kwargs["record"] = BK2_DIRECTORY
+      make_kwargs["record"] = BK2_DIRECTORY
+    # else:
+      # make_kwargs["state"] = random.choice(self.state_files)
 
     self.env = retro.make(**make_kwargs)
     self.env.movie_id = self.current_round
